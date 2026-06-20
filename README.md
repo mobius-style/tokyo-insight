@@ -53,20 +53,23 @@ python -m tokyo_insight refresh                         # incrementally add newl
 python -m tokyo_insight refresh --dry-run               # list new records without fetching
 ```
 
-### Committees covered (11)
+### Sources covered (12)
 
-Seven standing committees — 総務 (`general-affairs`), 財政 (`financial`),
-文教 (`educational`), 厚生 (`welfare`), 都市整備 (`urban-development`),
-経済・港湾 (`economic-port-and-harbor`), 環境・建設 (`environmental-construction`) —
-plus 警察・消防 (`police-fire-fighting`), 公営企業 (`public-enterprise`), the
-各会計決算特別委員会 (`special-accountiong`), and the **予算特別委員会**
-(`budget`). Records run **平成12年(2000)–present** (~5,300 records).
+The **本会議（定例会）** plenary record (`proceedings`) — 代表質問・一般質問・
+知事の所信表明・議決討論 — plus seven standing committees — 総務
+(`general-affairs`), 財政 (`financial`), 文教 (`educational`), 厚生 (`welfare`),
+都市整備 (`urban-development`), 経済・港湾 (`economic-port-and-harbor`),
+環境・建設 (`environmental-construction`) — and 警察・消防
+(`police-fire-fighting`), 公営企業 (`public-enterprise`), the 各会計決算特別委員会
+(`special-accountiong`), and the 予算特別委員会 (`budget`). Records run
+**平成11–12年(1999–2000)–present** (~7,800 records / ~15,700 indexed sections).
 
-The 予算特別委員会 uses a year-directory layout
-(`/record/budget/<year>/<n-mm>.html`, one 総括質疑 speaker-segment per page) —
-fetched the same robots-respecting way. The 決算/予算 special committees range
-across every bureau, so scoping with `--committee special-accountiong` /
-`--committee budget` sharpens routing when you specifically want them.
+Layouts differ by source — standing committees are flat `<year>-<seq>.html`,
+予算特別委員会 uses year directories, and 本会議録 uses session directories
+(`/record/proceedings/<year>-<session>/`) — all fetched the same
+robots-respecting way. Scope a query with `--committee proceedings` /
+`--committee budget` / `--committee special-accountiong` when you specifically
+want the plenary or a special committee (their topics overlap the others).
 
 ### Fail-safe
 

@@ -37,6 +37,8 @@ def list_records(slug: str) -> List[Tuple[str, str]]:
     _guard(slug)
     if slug in config.YEAR_DIR_SLUGS:
         return _list_year_dir(slug)
+    if slug in config.SESSION_DIR_SLUGS:
+        return _list_session_dir(slug)
     html = _get(f"{config.BASE_URL}/{slug}/")
     out: List[Tuple[str, str]] = []
     for m in re.finditer(r'href="(?:\./)?(\d{4}-\d+)\.html"[^>]*>(.*?)</a>',
@@ -57,6 +59,20 @@ def _list_year_dir(slug: str) -> List[Tuple[str, str]]:
         for m in re.finditer(r'href="(\d+-\d+)\.html"[^>]*>(.*?)</a>', yh, flags=re.S):
             label = re.sub(r"\s+", "", re.sub(r"<[^>]+>", "", m.group(2)))
             out.append((f"{y}/{m.group(1)}", label or y))
+    return out
+
+
+def _list_session_dir(slug: str) -> List[Tuple[str, str]]:
+    """本会議録: landing -> <year>-<session>/ dirs -> day / segment .html pages."""
+    landing = _get(f"{config.BASE_URL}/{slug}/")
+    sessions = sorted(set(re.findall(r'href="(\d{4}-\d+)/"', landing)))
+    out: List[Tuple[str, str]] = []
+    for i, s in enumerate(sessions):
+        if i:
+            time.sleep(config.REQUEST_DELAY_SEC)
+        sh = _get(f"{config.BASE_URL}/{slug}/{s}/")
+        for f in sorted(set(re.findall(r'href="([\d-]+\.html)"', sh))):
+            out.append((f"{s}/{f[:-5]}", s))     # record_id = "<year>-<session>/<file>"
     return out
 
 

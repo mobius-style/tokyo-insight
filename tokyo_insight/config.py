@@ -42,9 +42,13 @@ COMMITTEES = {
     "public-enterprise": "公営企業委員会",
     "special-accountiong": "各会計決算特別委員会",
     "budget": "予算特別委員会",
+    "proceedings": "本会議（定例会）",
 }
-# Committees whose records live under /record/<slug>/<year>/<rec>.html (year dirs).
+# Records under /record/<slug>/<year>/<rec>.html (year dirs).
 YEAR_DIR_SLUGS = frozenset({"budget"})
+# Records under /record/<slug>/<year>-<session>/<file>.html (session dirs) —
+# the 本会議録: each 定例会 回 is a directory of day / speaker-segment pages.
+SESSION_DIR_SLUGS = frozenset({"proceedings"})
 # Anything outside this set is refused by the fetcher (legacy romaji slugs such
 # as /record/bunkyo/ are robots-Disallow and must never be auto-fetched).
 ALLOWED_SLUGS = frozenset(COMMITTEES) | {"proceedings"}
