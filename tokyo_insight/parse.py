@@ -184,7 +184,11 @@ def _resolve(label: str, members: List[Dict], execs: List[Dict]) -> Tuple[str, s
                 score, best, kind = s, ent, k
     if best is not None:
         if kind == "member":
-            rc = "officer" if best["role"] in ("委員長", "副委員長") else "assembly_member"
+            # Only the presiding 委員長 is procedural (officer). 副委員長 / 理事 /
+            # 委員 participate substantively as 議員 → assembly_member, even when a
+            # 副委員長 occasionally presides (agenda cues still fire on procedural
+            # phrasing regardless of role; see _body).
+            rc = "officer" if best["role"] == "委員長" else "assembly_member"
             return best["name"], rc, True
         return best["name"], "executive", True
     if any(k in lab for k in _EXEC_KW):
@@ -222,6 +226,12 @@ def _body(lines: List[str], start: int, members, execs,
     buf: List[str] = []
     agenda: Optional[str] = None
     compact = [(strip_ws(a), a) for a in items if len(strip_ws(a)) >= 6]
+    # Presiding-capable members (chair OR vice-chair) drive agenda cues even
+    # though only the chair is labelled `officer`; this keeps agenda tracking
+    # when a 副委員長 presides without mislabelling vice-chairs as procedural.
+    presiding_names = {strip_ws(e["name"]) for e in members
+                       if e["role"] in ("委員長", "副委員長")}
+    cur_presiding = False
 
     def flush():
         nonlocal cur, buf
@@ -252,15 +262,16 @@ def _body(lines: List[str], start: int, members, execs,
                 label_part, first = (mm.group(1), mm.group(2)) if mm else (m.group(2), "")
             name, role, ok = _resolve(label_part, members, execs)
             cur = Utterance(strip_ws(label_part), name, role, ok, agenda, "")
+            cur_presiding = role == "officer" or strip_ws(name) in presiding_names
             if first.strip():
                 buf.append(first.strip())
-                if role == "officer":
+                if cur_presiding:
                     cue = _agenda_cue(first, compact)
                     if cue:
                         agenda = cue
             cur.agenda_item = agenda
             continue
-        if cur is not None and cur.speaker_role == "officer":
+        if cur is not None and cur_presiding:
             cue = _agenda_cue(ln, compact)
             if cue:
                 agenda = cue
