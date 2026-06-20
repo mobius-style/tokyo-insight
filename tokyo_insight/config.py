@@ -26,10 +26,10 @@ USER_AGENT = ("Tokyo-Insight/0.1 (MOBIUS civic-research engine; non-commercial; 
 REQUEST_DELAY_SEC = 1.5
 
 # robots-PERMITTED English-slug committee paths (verified against robots.txt +
-# sitemap.xml). Standing committees + the high-value 決算 special committees.
-# NOTE: 予算特別委員会 (budget) publishes NO static records here (only the
-# robots-Disallow romaji `yotoku`), so it is not reachable under the ship-engine
-# model. 'special-accountiong' is the site's own (mis)spelled slug — keep verbatim.
+# sitemap.xml). Standing committees + the 決算/予算 special committees.
+# 'special-accountiong' is the site's own (mis)spelled slug — keep verbatim.
+# 'budget' (予算特別委員会) uses a YEAR-DIR layout: /record/budget/<year>/<n-mm>.html
+# (one 総括質疑 speaker-segment per page) — handled specially in fetch.list_records.
 COMMITTEES = {
     "general-affairs": "総務委員会",
     "financial": "財政委員会",
@@ -41,7 +41,10 @@ COMMITTEES = {
     "police-fire-fighting": "警察・消防委員会",
     "public-enterprise": "公営企業委員会",
     "special-accountiong": "各会計決算特別委員会",
+    "budget": "予算特別委員会",
 }
+# Committees whose records live under /record/<slug>/<year>/<rec>.html (year dirs).
+YEAR_DIR_SLUGS = frozenset({"budget"})
 # Anything outside this set is refused by the fetcher (legacy romaji slugs such
 # as /record/bunkyo/ are robots-Disallow and must never be auto-fetched).
 ALLOWED_SLUGS = frozenset(COMMITTEES) | {"proceedings"}

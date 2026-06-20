@@ -53,20 +53,20 @@ python -m tokyo_insight refresh                         # incrementally add newl
 python -m tokyo_insight refresh --dry-run               # list new records without fetching
 ```
 
-### Committees covered
+### Committees covered (11)
 
 Seven standing committees — 総務 (`general-affairs`), 財政 (`financial`),
 文教 (`educational`), 厚生 (`welfare`), 都市整備 (`urban-development`),
 経済・港湾 (`economic-port-and-harbor`), 環境・建設 (`environmental-construction`) —
-plus 警察・消防 (`police-fire-fighting`), 公営企業 (`public-enterprise`), and the
-各会計決算特別委員会 (`special-accountiong`). Records run **平成12年(2000)–present**.
+plus 警察・消防 (`police-fire-fighting`), 公営企業 (`public-enterprise`), the
+各会計決算特別委員会 (`special-accountiong`), and the **予算特別委員会**
+(`budget`). Records run **平成12年(2000)–present** (~5,300 records).
 
-**Not covered:** the 予算特別委員会 (budget special committee) publishes no
-robots-permitted static record on the site, so it is out of scope; its romaji
-path is `Disallow:` and is never fetched. Budget scrutiny still appears within
-the standing committees' divisional review. Ask about 決算 with
-`--committee special-accountiong` (its topics overlap the standing committees,
-so scoping sharpens routing).
+The 予算特別委員会 uses a year-directory layout
+(`/record/budget/<year>/<n-mm>.html`, one 総括質疑 speaker-segment per page) —
+fetched the same robots-respecting way. The 決算/予算 special committees range
+across every bureau, so scoping with `--committee special-accountiong` /
+`--committee budget` sharpens routing when you specifically want them.
 
 ### Fail-safe
 
