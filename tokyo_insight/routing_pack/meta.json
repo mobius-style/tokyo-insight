@@ -1,11 +1,9 @@
 {
-  "records": 3151,
+  "records": 4438,
+  "sections": 11956,
   "dim": 1024,
   "embedding_model": "intfloat/multilingual-e5-large",
-  "note": "facts + MOBIUS-derived record vectors only; no minutes text",
+  "granularity": "agenda-section (max-pool at query time)",
   "updated_at": "2026-06-20",
-  "skipped": [
-    "economic-port-and-harbor/2000-08",
-    "environmental-construction/2005-01"
-  ]
+  "note": "facts + MOBIUS-derived section vectors only; no minutes text"
 }

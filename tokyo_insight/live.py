@@ -45,9 +45,10 @@ def _gather(cands: List[Candidate]) -> List[Chunk]:
     return chunks
 
 
-def _retrieve_local(query: str, model, chunks: List[Chunk]) -> List[int]:
+def _retrieve_local(query: str, model, chunks: List[Chunk]):
+    """Return (top chunk indices, max dense similarity) over the fetched chunks."""
     if not chunks:
-        return []
+        return [], 0.0
     emb = model.encode([f"passage: {c.text}" for c in chunks],
                        normalize_embeddings=True, show_progress_bar=False,
                        convert_to_numpy=True).astype(np.float32)
@@ -57,7 +58,7 @@ def _retrieve_local(query: str, model, chunks: List[Chunk]) -> List[int]:
     bm25 = BM25Okapi([char_bigrams(c.text) for c in chunks])
     bm = bm25.get_scores(char_bigrams(query))
     hybrid = config.DENSE_WEIGHT * _minmax(dense) + config.BM25_WEIGHT * _minmax(bm)
-    return list(np.argsort(-hybrid)[:config.HYBRID_TOPN])
+    return list(np.argsort(-hybrid)[:config.HYBRID_TOPN]), float(dense.max())
 
 
 def ask_live(question: str, committee: Optional[str] = None,
@@ -65,13 +66,17 @@ def ask_live(question: str, committee: Optional[str] = None,
     model = _embedder()
     cands = route(question, model, committee=committee)
     chunks = _gather(cands)
-    idxs = _retrieve_local(question, model, chunks)
+    idxs, max_sim = _retrieve_local(question, model, chunks)
     ci = [(i, chunks[i]) for i in idxs]
     routed = [{"committee": c.committee, "record": c.record, "session": c.session,
                "score": round(c.score, 3), "url": c.url} for c in cands]
+    # Fail-safe layer 1: nothing relevant retrieved -> abstain (no LLM call).
+    abstained = (not ci) or (max_sim < config.ABSTAIN_MIN_SIM)
     out: Dict = {
         "question": question,
         "routed_records": routed,
+        "max_sim": round(max_sim, 3),
+        "abstained": abstained,
         "retrieved": [{"n": n, "chunk_id": c.chunk_id, "speaker": c.speaker_name,
                        "role": c.speaker_role, "agenda": c.agenda_item,
                        "meeting": f"{c.meeting_kind}/{c.meeting_date}", "url": c.url}
@@ -79,6 +84,11 @@ def ask_live(question: str, committee: Optional[str] = None,
     }
     if not answer:                 # offline mode: routing + retrieval only, no key
         return out
+    if abstained:
+        out.update(answer=governance.ABSTAIN_MESSAGE, ok=True, latency_ms=0, usage={})
+        return out
+    # Fail-safe layer 2: the prompt makes the LLM abstain when sources don't
+    # actually address the question (content-aware).
     user = "## Retrieved sources\n\n" + _format(ci) + "\n## Question\n\n" + question
     resp = llm.chat(governance.SYSTEM, user)
     out.update(answer=resp.text if resp.ok else f"[LLM error] {resp.error}",

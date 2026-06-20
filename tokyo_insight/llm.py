@@ -31,34 +31,44 @@ def _api_key() -> str:
 
 
 def chat(system: str, user: str, *, max_tokens: int = 2400,
-         temperature: float = 0.2) -> LLMResponse:
+         temperature: float = 0.2, retries: int = 3) -> LLMResponse:
     body = json.dumps({
         "model": config.LLM_MODEL,
         "messages": [{"role": "system", "content": system},
                      {"role": "user", "content": user}],
         "max_tokens": max_tokens, "temperature": temperature,
     }).encode("utf-8")
-    req = urllib.request.Request(
-        f"{config.LLM_API_BASE}/chat/completions", data=body,
-        headers={"Authorization": f"Bearer {_api_key()}",
-                 "Content-Type": "application/json",
-                 "Accept": "application/json",
-                 # urllib's default UA is blocked by Cloudflare (403/1010);
-                 # send a normal client UA.
-                 "User-Agent": "tokyo-insight/0.1 (+https://mobius; python)"})
     t0 = time.time()
-    try:
-        with urllib.request.urlopen(req, timeout=120) as r:
-            data = json.loads(r.read().decode("utf-8"))
-        return LLMResponse(
-            ok=True, text=data["choices"][0]["message"]["content"],
-            latency_ms=int((time.time() - t0) * 1000), usage=data.get("usage", {}))
-    except Exception as e:  # noqa: BLE001
-        detail = ""
-        if hasattr(e, "read"):
-            try:
-                detail = e.read().decode("utf-8", "replace")[:300]
-            except Exception:
-                pass
-        return LLMResponse(ok=False, error=f"{e} {detail}".strip(),
-                           latency_ms=int((time.time() - t0) * 1000))
+    last = ""
+    for attempt in range(retries + 1):
+        req = urllib.request.Request(
+            f"{config.LLM_API_BASE}/chat/completions", data=body,
+            headers={"Authorization": f"Bearer {_api_key()}",
+                     "Content-Type": "application/json",
+                     "Accept": "application/json",
+                     # urllib's default UA is blocked by Cloudflare (403/1010);
+                     # send a normal client UA.
+                     "User-Agent": "tokyo-insight/0.1 (+https://mobius; python)"})
+        try:
+            with urllib.request.urlopen(req, timeout=120) as r:
+                data = json.loads(r.read().decode("utf-8"))
+            return LLMResponse(
+                ok=True, text=data["choices"][0]["message"]["content"],
+                latency_ms=int((time.time() - t0) * 1000), usage=data.get("usage", {}))
+        except Exception as e:  # noqa: BLE001
+            detail = ""
+            code = getattr(e, "code", None)
+            if hasattr(e, "read"):
+                try:
+                    detail = e.read().decode("utf-8", "replace")[:300]
+                except Exception:
+                    pass
+            last = f"{e} {detail}".strip()
+            # retry only transient failures (429 rate-limit / 5xx / network)
+            transient = code in (429, 500, 502, 503, 504) or code is None
+            if attempt < retries and transient:
+                time.sleep(1.5 * (2 ** attempt))   # 1.5s, 3s, 6s backoff
+                continue
+            break
+    return LLMResponse(ok=False, error=last,
+                       latency_ms=int((time.time() - t0) * 1000))

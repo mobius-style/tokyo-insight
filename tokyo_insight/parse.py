@@ -19,8 +19,13 @@ _K = {"〇": 0, "零": 0, "一": 1, "二": 2, "三": 3, "四": 4, "五": 5,
 
 
 def kansuji(s: str) -> int:
+    s = s.strip()
+    # Positional notation (e.g. 一〇=10, 一四=14) — used in some titles/dates —
+    # has no 十/百/千 markers; concatenate the digits.
+    if s and not any(c in s for c in "十百千") and all(c in _K for c in s):
+        return int("".join(str(_K[c]) for c in s))
     total = cur = 0
-    for ch in s.strip():
+    for ch in s:
         if ch in _K:
             cur = _K[ch]
         elif ch == "十":
@@ -29,6 +34,10 @@ def kansuji(s: str) -> int:
             cur = 0
         elif ch == "百":
             cur = (cur or 1) * 100
+            total += cur
+            cur = 0
+        elif ch == "千":
+            cur = (cur or 1) * 1000
             total += cur
             cur = 0
     return total + cur

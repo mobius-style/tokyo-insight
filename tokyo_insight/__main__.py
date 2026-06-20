@@ -76,7 +76,8 @@ def _cmd_refresh(a):
     if not r.get("applied"):
         print("routing pack already current (0 new records)")
         return 0
-    print(f"refreshed: +{r['added']} record(s) embedded (total {r['total']})")
+    print(f"refreshed: +{r['added_records']} record(s) / "
+          f"{r['added_sections']} sections (total {r['total']})")
 
 
 def _stale_notice():

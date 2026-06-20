@@ -25,7 +25,11 @@ USER_AGENT = ("Tokyo-Insight/0.1 (MOBIUS civic-research engine; non-commercial; 
               "robots-respecting; local-only)")
 REQUEST_DELAY_SEC = 1.5
 
-# robots-PERMITTED standing-committee slugs (English) + the plenary path.
+# robots-PERMITTED English-slug committee paths (verified against robots.txt +
+# sitemap.xml). Standing committees + the high-value 決算 special committees.
+# NOTE: 予算特別委員会 (budget) publishes NO static records here (only the
+# robots-Disallow romaji `yotoku`), so it is not reachable under the ship-engine
+# model. 'special-accountiong' is the site's own (mis)spelled slug — keep verbatim.
 COMMITTEES = {
     "general-affairs": "総務委員会",
     "financial": "財政委員会",
@@ -34,6 +38,9 @@ COMMITTEES = {
     "urban-development": "都市整備委員会",
     "economic-port-and-harbor": "経済・港湾委員会",
     "environmental-construction": "環境・建設委員会",
+    "police-fire-fighting": "警察・消防委員会",
+    "public-enterprise": "公営企業委員会",
+    "special-accountiong": "各会計決算特別委員会",
 }
 # Anything outside this set is refused by the fetcher (legacy romaji slugs such
 # as /record/bunkyo/ are robots-Disallow and must never be auto-fetched).
@@ -75,6 +82,12 @@ LIVE_MAX_FETCH = int(os.environ.get("TOKYO_INSIGHT_LIVE_MAX", 6))  # hard cap/qu
 # user-initiated; ask-live just *notices* when the pack is older than this and
 # suggests `refresh`. No silent background fetching (consent / anti-bulk-crawl).
 ROUTING_STALE_DAYS = int(os.environ.get("TOKYO_INSIGHT_STALE_DAYS", 90))
+
+# Fail-safe: if the best retrieved chunk's dense similarity to the query is below
+# this, the question is treated as out-of-scope / no-matching-record and the
+# engine abstains WITHOUT calling the LLM (cheap guard; the governance prompt is
+# the second, content-aware abstain layer). e5 in-scope hits sit ~0.86-0.92.
+ABSTAIN_MIN_SIM = float(os.environ.get("TOKYO_INSIGHT_ABSTAIN_SIM", 0.84))
 
 
 def committee_name(slug: str) -> str:

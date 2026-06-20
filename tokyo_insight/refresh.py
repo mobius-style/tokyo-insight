@@ -46,8 +46,12 @@ def _load_pack():
         vecs = np.load(vfile)
         pack = [json.loads(l) for l in
                 pfile.read_text(encoding="utf-8").splitlines()]
-        return vecs, pack
-    return np.zeros((0, 0), dtype=np.float32), []
+        srf = config.ROUTING_DIR / "section_records.npy"
+        sec_rec = (np.load(srf) if srf.exists()
+                   else np.arange(len(pack), dtype=np.int32))
+        return vecs, pack, sec_rec
+    return (np.zeros((0, 0), dtype=np.float32), [],
+            np.zeros((0,), dtype=np.int32))
 
 
 def pack_meta() -> dict:
@@ -74,7 +78,7 @@ def find_new(committees: Optional[List[str]] = None) -> List[Tuple[str, str, str
     """[(slug, record, label)] present on the (robots-OK) landing pages but not
     yet in the local routing pack — excluding records already known to parse empty
     (meta.skipped), so refresh stays idempotent and doesn't re-fetch them."""
-    _, pack = _load_pack()
+    _, pack, _ = _load_pack()
     have = {(p["committee"], p["record"]) for p in pack}
     skip = set(pack_meta().get("skipped", []))
     out: List[Tuple[str, str, str]] = []
@@ -94,9 +98,16 @@ def refresh(committees: Optional[List[str]] = None, dry_run: bool = False,
                 "applied": False}
 
     model = model or _embedder()
-    vecs, pack = _load_pack()
+    vecs, pack, sec_rec = _load_pack()
     skipped = set(pack_meta().get("skipped", []))
-    add_vecs: List[np.ndarray] = []
+    add_vecs: List[np.ndarray] = []          # new section vectors
+    add_sec_rec: List[int] = []              # new section -> record index
+    added_records = 0
+
+    def _pool(rows_emb):
+        v = rows_emb.mean(axis=0); n = float((v * v).sum() ** 0.5)
+        return (v / n if n > 1e-9 else v).astype(np.float32)
+
     for i, (slug, rec, label) in enumerate(new):
         path = config.RAW_DIR / slug / f"{rec}.html"
         if not (path.exists() and path.stat().st_size > 0):
@@ -112,30 +123,37 @@ def refresh(committees: Optional[List[str]] = None, dry_run: bool = False,
         emb = model.encode([f"passage: {c.text}" for c in chs],
                            normalize_embeddings=True, show_progress_bar=False,
                            convert_to_numpy=True).astype(np.float32)
-        v = emb.mean(axis=0)
-        n = float((v * v).sum() ** 0.5)
-        add_vecs.append(v / n if n > 1e-9 else v)
+        ridx = len(pack)                              # this record's index
+        sections: dict = {}
+        for j, c in enumerate(chs):
+            sections.setdefault(c.agenda_item or "_", []).append(j)
+        for _ag, js in sections.items():              # one vector per agenda section
+            add_vecs.append(_pool(emb[js])); add_sec_rec.append(ridx)
         speakers = list(dict.fromkeys(c.speaker_name for c in chs if c.speaker_name))
         pack.append({"committee": slug, "record": rec, "url": url,
                      "date": m.meeting_date or _jp_date(label),
                      "session": _session(rec), "speakers": speakers})
+        added_records += 1
 
     if add_vecs:
         add = np.vstack(add_vecs).astype(np.float32)
         vecs = add if vecs.size == 0 else np.vstack([vecs, add])
+        sec_rec = np.concatenate([sec_rec, np.array(add_sec_rec, dtype=np.int32)])
 
     config.ROUTING_DIR.mkdir(parents=True, exist_ok=True)
     np.save(config.ROUTING_DIR / "routing_vectors.npy", vecs)
+    np.save(config.ROUTING_DIR / "section_records.npy", sec_rec)
     with (config.ROUTING_DIR / "routing_pack.jsonl").open("w", encoding="utf-8") as fh:
         for p in pack:
             fh.write(json.dumps(p, ensure_ascii=False) + "\n")
     meta = pack_meta()
-    meta.update(records=len(pack), dim=int(vecs.shape[1]),
-                embedding_model=config.E5_MODEL_ID,
+    meta.update(records=len(pack), sections=int(vecs.shape[0]),
+                dim=int(vecs.shape[1]), embedding_model=config.E5_MODEL_ID,
                 updated_at=datetime.date.today().isoformat(),
                 skipped=sorted(skipped),
-                note="facts + MOBIUS-derived record vectors only; no minutes text")
+                note="facts + MOBIUS-derived section vectors only; no minutes text")
     (config.ROUTING_DIR / "meta.json").write_text(
         json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
-    return {"new": len(new), "added": len(add_vecs), "skipped": len(skipped),
+    return {"new": len(new), "added_records": added_records,
+            "added_sections": len(add_vecs), "skipped": len(skipped),
             "total": len(pack), "applied": True}
