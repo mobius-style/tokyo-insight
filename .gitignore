@@ -1,0 +1,19 @@
+# Local, user-fetched data — NEVER committed (minutes text stays off the repo)
+tokyo_insight_data/
+**/raw/
+*.html
+
+# Secrets
+.env
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# NOTE: tokyo_insight/routing_pack/ (facts + vectors, no text) IS shipped on purpose.

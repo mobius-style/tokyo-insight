@@ -1,0 +1,6 @@
+sentence-transformers>=2.2
+faiss-cpu>=1.7
+numpy>=1.23
+# BM25 is inline (no rank_bm25); LLM via urllib (no openai SDK); records are
+# static HTML (no playwright). multilingual-e5-large is pulled on first run.
+# A CUDA GPU is used automatically if torch sees one.
