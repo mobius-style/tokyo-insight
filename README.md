@@ -35,7 +35,8 @@ reader; it grants no rights beyond what the law already allows.
 ## Install
 
 ```bash
-pip install -r requirements.txt        # or: pip install .
+pip install -r requirements.txt        # or: pip install .  (also installs a
+                                       #  `tokyo-insight` console command)
 export GROQ_API_KEY=...                 # or TOKYO_INSIGHT_API_KEY (any OpenAI-compatible endpoint)
 ```
 
@@ -62,7 +63,7 @@ The **本会議（定例会）** plenary record (`proceedings`) — 代表質問
 環境・建設 (`environmental-construction`) — and 警察・消防
 (`police-fire-fighting`), 公営企業 (`public-enterprise`), the 各会計決算特別委員会
 (`special-accountiong`), and the 予算特別委員会 (`budget`). Records run
-**平成11–12年(1999–2000)–present** (~7,800 records / ~15,700 indexed sections).
+**平成11–12年(1999–2000)–present** (~7,855 records / ~15,683 indexed sections).
 
 Layouts differ by source — standing committees are flat `<year>-<seq>.html`,
 予算特別委員会 uses year directories, and 本会議録 uses session directories
@@ -103,3 +104,17 @@ reuse-permitted: the engine cites and links, and never redistributes minutes tex
 ## License
 
 Code & schema: **AGPL-3.0-or-later** (see `LICENSE`). MOBIUS brand reserved.
+
+> Note: the repository is ~180 MB to clone — the packaged routing pack ships
+> ~62 MB of routing vectors (`tokyo_insight/routing_pack/routing_vectors.npy`)
+> so the engine works out of the box with no corpus build.
+
+## Related — the Möbius program
+
+Part of the [MOBIUS](https://github.com/mobius-style) program — local-first, AGPL:
+
+- [mmv](https://github.com/mobius-style/mmv) — answer-entitlement runtime: decides *whether* answering is warranted
+- [rqa](https://github.com/mobius-style/rqa) — reflective questioning adapter: deepens *the question* when it is not
+- [rcgov](https://github.com/mobius-style/rcgov) — reflective context governor: governs *what a model may read*
+- [infinity](https://github.com/mobius-style/infinity) — composite capstone (MMV × RQA) with an OpenAI-compatible API
+- [tokyo-insight](https://github.com/mobius-style/tokyo-insight) — this repo

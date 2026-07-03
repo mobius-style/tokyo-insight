@@ -4,6 +4,8 @@
   python -m tokyo_insight fetch <committee> [<rec> ...] [--latest N]
   python -m tokyo_insight build
   python -m tokyo_insight ask "<question>"
+  python -m tokyo_insight ask-live "<question>" [--committee <slug>] [--dry-run]
+  python -m tokyo_insight refresh [--committee <slug>] [--dry-run]
   python -m tokyo_insight committees
 """
 from __future__ import annotations
