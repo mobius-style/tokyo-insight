@@ -106,9 +106,8 @@ reuse-permitted: the engine cites and links, and never redistributes minutes tex
 A companion systems paper documents the architecture, the legal posture, and
 the abstention-first design:
 
-> Toeda, T. (2026). *The Engine, Not the Archive — Tokyo Insight: an
-> On-Demand, Citation-Grounded, Abstention-First Civic-RAG Engine for Tokyo
-> Metropolitan Assembly Deliberation Records.* MOBIUS LLC. DOI:
+> Toeda, T. (2026). *Public, but Unread — Tokyo Insight: Making the Tokyo
+> Metropolitan Assembly's Live Deliberation Record Askable.* MOBIUS LLC. DOI:
 > [10.5281/zenodo.21231675](https://doi.org/10.5281/zenodo.21231675).
 
 See `CITATION.cff` for machine-readable metadata.
