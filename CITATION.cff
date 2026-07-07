@@ -1,23 +1,27 @@
 cff-version: 1.2.0
-title: "Tokyo Insight — on-demand civic-RAG engine for 東京都議会 deliberation records"
-message: "If you use this software, please cite it using the metadata below."
+title: "Tokyo Insight — on-demand civic-RAG engine for Tokyo Metropolitan Assembly deliberation records"
+message: "If you use Tokyo Insight, please cite the companion systems paper (preferred) or this repository."
 type: software
 authors:
   - family-names: Toeda
     given-names: Taiko
     affiliation: MOBIUS LLC
-abstract: >-
-  Local-first, citation-grounded civic-RAG engine over Tokyo Metropolitan
-  Assembly deliberation records (plenary + committees, 1999-present).
-  Ships engine + facts-only routing pack; fetches only the relevant
-  records on demand and never redistributes minutes text.
+    orcid: "https://orcid.org/0009-0001-7267-0201"
 repository-code: "https://github.com/mobius-style/tokyo-insight"
-url: "https://github.com/mobius-style/tokyo-insight"
 license: AGPL-3.0-or-later
-version: 0.1.0
 keywords:
-  - civic-tech
-  - retrieval-augmented-generation
-  - tokyo
-  - local-government
+  - civic-technology
+  - rag
+  - parliamentary-records
   - local-first
+  - abstention
+preferred-citation:
+  type: report
+  title: "The Engine, Not the Archive — Tokyo Insight: an On-Demand, Citation-Grounded, Abstention-First Civic-RAG Engine for Tokyo Metropolitan Assembly Deliberation Records"
+  authors:
+    - family-names: Toeda
+      given-names: Taiko
+      affiliation: MOBIUS LLC
+      orcid: "https://orcid.org/0009-0001-7267-0201"
+  doi: 10.5281/zenodo.21231675
+  year: 2026

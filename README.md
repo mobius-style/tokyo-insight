@@ -101,6 +101,18 @@ used by any means — the most on-point basis for assembly deliberation), **30�
 contains only facts + derived vectors, not expression. `robots`-permitted ≠
 reuse-permitted: the engine cites and links, and never redistributes minutes text.
 
+## Citation
+
+A companion systems paper documents the architecture, the legal posture, and
+the abstention-first design:
+
+> Toeda, T. (2026). *The Engine, Not the Archive — Tokyo Insight: an
+> On-Demand, Citation-Grounded, Abstention-First Civic-RAG Engine for Tokyo
+> Metropolitan Assembly Deliberation Records.* MOBIUS LLC. DOI:
+> [10.5281/zenodo.21231675](https://doi.org/10.5281/zenodo.21231675).
+
+See `CITATION.cff` for machine-readable metadata.
+
 ## License
 
 Code & schema: **AGPL-3.0-or-later** (see `LICENSE`). MOBIUS brand reserved.
