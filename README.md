@@ -72,11 +72,25 @@ robots-respecting way. Scope a query with `--committee proceedings` /
 `--committee budget` / `--committee special-accountiong` when you specifically
 want the plenary or a special committee (their topics overlap the others).
 
-### Fail-safe
+### Fail-safe — and how far it reaches
 
-For out-of-scope or no-matching-record questions the engine **abstains** rather
-than fabricate — first via a retrieval-confidence gate, then via a content-aware
-check in the answer prompt. It will tell you it found nothing rather than guess.
+For out-of-scope or no-matching-record questions the engine is designed to
+**abstain** rather than answer, through two stages of different strength:
+
+1. a **retrieval-confidence gate** — deterministic, runs before any model call,
+   and is the stage you can actually rely on. Below threshold, no answer is
+   generated at all;
+2. a **content-aware check in the answer prompt** — an instruction to the
+   language model you configured. It is advisory. You supply the model and the
+   endpoint, so this stage is exactly as reliable as that model is, and a model
+   that ignores the instruction will produce an answer that looks like the
+   others.
+
+That second stage cannot be a guarantee, and this matters here more than in most
+domains: these are civic records, and a fabricated attribution to a named
+council member is a high-consequence error. **Verify against the citations.**
+Every answer carries record references precisely so that the reader, not the
+model, is the last check.
 
 `ask-live` notices when the routing pack is older than 90 days and suggests
 `refresh`. `refresh` is incremental and user-initiated — it fetches only records
