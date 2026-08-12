@@ -134,6 +134,18 @@ Code & schema: **AGPL-3.0-or-later** (see `LICENSE`). MOBIUS brand reserved.
 > ~62 MB of routing vectors (`tokyo_insight/routing_pack/routing_vectors.npy`)
 > so the engine works out of the box with no corpus build.
 
+### Commercial license
+
+If your organization cannot meet AGPL's source-disclosure obligations, a
+commercial license is available from MOBIUS LLC (sole rights holder):
+**USD 500 per month, per company — cancel anytime, no minimum term.**
+Annual invoicing available at USD 5,000/year.
+
+It is a license grant, not a service: no service is performed, no data of
+yours is accessed, and nothing you run depends on our availability.
+
+Contact: **info@mobius.style** — licensing questions are not handled in Issues.
+
 ## Related — the Möbius program
 
 Part of the [MOBIUS](https://github.com/mobius-style) program — local-first, AGPL:
